@@ -1,5 +1,7 @@
 # refprice — a cross-venue reference price, with the methodology on the page
 
+[![ci](https://github.com/shunqo/refprice/actions/workflows/ci.yml/badge.svg)](https://github.com/shunqo/refprice/actions/workflows/ci.yml)
+
 A volume-weighted median BTC/USDT price across four independent public venues, computed every five
 minutes, published five minutes behind the clock, and **explicitly undefined whenever fewer than
 three venues actually traded**.

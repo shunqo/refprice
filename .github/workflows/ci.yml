@@ -1,0 +1,43 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Weekly, so a dependency or a Python release breaking the build is noticed
+  # here rather than by whoever clones it next.
+  schedule:
+    - cron: "0 6 * * 1"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Test
+        # The suite makes no network calls: every source is stubbed. Nothing here
+        # depends on a venue being up, so a red run means the code broke.
+        run: uv run --python ${{ matrix.python-version }} --extra dev pytest -q
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Ruff lint
+        run: uv run --extra dev ruff check .
+      - name: Ruff format check
+        run: uv run --extra dev ruff format --check .
+      - name: Type check
+        run: uv run --extra dev basedpyright
