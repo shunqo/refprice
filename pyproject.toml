@@ -1,0 +1,58 @@
+[project]
+name = "refprice"
+version = "0.1.0"
+description = "Robust cross-venue reference price with a published methodology, and the single-venue settlement risk it removes."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    # A real dependency on the sibling project, not a copy-paste of it. `refprice` reuses mdq's
+    # source adapters, rate limiter, models, calendars and bind policy unchanged; only the
+    # aggregation, the methodology and the page are new.
+    "mdq @ git+https://github.com/shunqo/mdq@main",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6", "basedpyright>=1.19"]
+
+[project.scripts]
+refprice = "refprice.cli:main"
+
+# Developing both halves side by side? Clone `mdq` next to this repo and uncomment the block
+# below; uv will then use the working copy instead of fetching the published one. `run.sh` does
+# the equivalent for a plain pip venv, automatically, when it sees `../mdq`.
+#
+# [tool.uv.sources]
+# mdq = { path = "../mdq", editable = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+# The `mdq` dependency above is a PEP 508 direct reference (a git URL). Hatchling refuses those by
+# default, because a package carrying one cannot be uploaded to PyPI. This one is not going to
+# PyPI, and vendoring a copy of `mdq` instead would be strictly worse.
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/refprice"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "N", "RET", "ARG", "PTH", "C4", "TID"]
+ignore = ["E501", "N818"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+
+[tool.basedpyright]
+include = ["src", "tests"]
+typeCheckingMode = "standard"
+pythonVersion = "3.11"
+reportMissingTypeStubs = false
